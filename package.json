@@ -1,0 +1,10 @@
+{
+  "name": "keep-git",
+  "version": "1.0.0",
+  "description": "𝌊 keeps your stats on GitHub",
+  "scripts": {
+    "start": "make start"
+  },
+  "author": "karadyauran",
+  "license": "MIT"
+}
