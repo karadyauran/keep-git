@@ -26,5 +26,5 @@ KeepGit is a Python script that generates code daily, saving it in a specified f
 
 ## Contact 𝌊
 
-Author: Oleksandr Karadiaur  
+Author: Alex Karadiaur  
 LinkedIn: [click here](https://www.linkedin.com/in/karadyauran/)
