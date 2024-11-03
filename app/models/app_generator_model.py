@@ -1,4 +1,6 @@
 from enum import Enum
+from pydantic import BaseModel
+
 
 
 class Role(Enum):
@@ -7,6 +9,6 @@ class Role(Enum):
     Assistant = "assistant"
 
 
-class ChatHistory:
+class ChatRecord(BaseModel):
     role: Role
     content: str
