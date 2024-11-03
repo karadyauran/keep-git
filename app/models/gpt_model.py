@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class PromptModel:
     prompt_text: str

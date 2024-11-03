@@ -10,30 +10,24 @@ prompts:
   # Generating idea for a future application
   idea:
     prompt: |
-      Provide an idea for a {language} application consisting of {n_files} files that addresses a real-world problem. 
-      In answer give my and app name in header and description after, use only one "return". Without markdown. Up to 100 words. 
-      Example:
-
-      App Name
-      Description
+      Provide an idea for a web application on python consisting of 10-20 files. Name must be a snake_case, description up to 20 words
     description: 'Suggests ideas for new applications.'
 
   # Make structure for code
   structure:
     prompt: |
-      List {n_files} file names for the {language} app we discussed. Use the .{ext} extension, without spaces. 
-      Example: file1.{ext}, file2.{ext}, file3.{ext}
+      List of file names for app we discussed before. Print a file with location (app/main.py, etc...). Use clean architecture for flask web app.
     description: 'Creates the initial structure for an application.'
 
   # Request code for a specific file
   code:
     prompt: |
-      Write the code for {file_name} in {language}. Ensure all files interact properly. 
-      Limit the code from 50 to 100 lines. Provide only the code, without markdown. Do not use any comments, never.
+      Write the code for {file_path}. Ensure all files interact properly. 
+      Limit the code from 50 to 100 lines. Provide only the code, without markdown. Use few comments, in English only.
     description: 'Generates code for specific modules based on requirements.'
 
   # Generate a commit message
   commit:
     prompt: |
-      Create a concise commit message for adding {file_name}.
+      Create a concise commit message for adding {file_path}. Make a short but clear comment.
     description: 'Provides clear and concise commit messages.'
