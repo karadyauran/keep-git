@@ -26,11 +26,15 @@ prompts:
   code:
     prompt: |
       Write the full code for {file_path}. Ensure all files interact properly. 
+      Do not use an examples in the code, just clean code, as a real project.
+      If it is Readme.file, mention in code, that project created by Openai API.
       Limit the code from 50 to 100 lines. Provide only the code, without markdown. Use few comments in English only.
     description: 'Generates code for specific modules based on requirements.'
 
   # Generate a commit message
   commit:
     prompt: |
-      Create a concise commit message for adding {file_path}. Make a short but clear comment.
+      Create a concise commit message for adding {file_path}. Make a short but clear comment. 
+      Use creative commit messages. Don't repeat yourself.
+      Do not use quotes. Make a short commit message, up to 7 words.
     description: 'Provides clear and concise commit messages.'

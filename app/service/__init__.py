@@ -1,1 +1,2 @@
-from app.service.app_generator import AppGenerator
+from app.service.app_generator_service import AppGenerator
+from app.service.github_service import GitHubService

@@ -35,9 +35,9 @@ def load_prompts() -> PromptsModel:
 
 
 def load_github_config() -> GitHubClientModel:
-    with open("config/prompts.yaml", "r") as file:
+    with open("config/github.yaml", "r") as file:
         config_data = yaml.safe_load(file)
     return GitHubClientModel(
-        github_token=config_data["github"]["token"],
-        repos=config_data["github"]["repos"],
+        github_token=os.getenv(config_data["tokens"]["github_token"]),
+        repo=os.getenv(config_data["repo"]),
     )

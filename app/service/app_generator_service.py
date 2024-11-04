@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from openai import OpenAI
 from openai.types.chat.parsed_chat_completion import ParsedChatCompletion
@@ -8,7 +9,9 @@ from app.models.config_model import ConfigModel
 from app.models.prompts_model import PromptsModel
 import app.models.responses as responses
 from app.models.app_generator_model import Role, ChatRecord
-from app.models.responses import AppResponse, StructureResponse, CodeResponse
+from app.models.responses import AppResponse, StructureResponse, CodeResponse, CommitResponse
+
+from app.service.github_service import GitHubService
 
 
 def create_file_with_code(file_path, file_name, code) -> None:
@@ -18,12 +21,19 @@ def create_file_with_code(file_path, file_name, code) -> None:
         file.write(code)
         file.close()
 
+def reset_folder(folder_path: str) -> None:
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)
+    os.mkdir(folder_path)
+
 
 class AppGenerator:
-    def __init__(self, cfg: ConfigModel) -> None:
+    def __init__(self, cfg: ConfigModel, github_service: GitHubService) -> None:
         self.cfg = cfg
         self.client = OpenAI(api_key=cfg.openai_api_key)
         self.history = []
+
+        self.github_service = github_service
 
     def send_request(self, request: str, response_format: responses, model: str = None, temperature: float = None,
                      max_tokens: int = 1000) -> ParsedChatCompletion:
@@ -61,6 +71,8 @@ class AppGenerator:
 
     def create_app(self) -> None:
         """Creates an application"""
+        self.github_service.delete_all_files()
+
         prompts: PromptsModel = load_prompts()  # import prompts from prompts config
 
         # Idea generator
@@ -82,10 +94,11 @@ class AppGenerator:
             file_path = project_path + file.path
             create_file_with_code(file_path=file_path, file_name=file.filename, code=code.code)
 
+            commit_message: CommitResponse = self.send_request(request=prompts.commit_prompt,
+                                                               response_format=CommitResponse,
+                                                               max_tokens=100)
 
-if __name__ == '__main__':
-    config = load_config_model()
-    github_client_config = load_github_config
+            self.github_service.upload_file(local_file_path=file_path+file.filename, commit_message=commit_message.commit,
+                                            remote_dir=file.path)
 
-    generator = AppGenerator(config)
-    generator.create_app()
+        reset_folder(self.cfg.generated_files_path)
