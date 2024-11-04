@@ -23,7 +23,7 @@ def load_prompts() -> PromptsModel:
     with open("config/prompts.yaml", "r") as file:
         config_data = yaml.safe_load(file)
     return PromptsModel(
-        defalut_settings={
+        default_settings={
             "role": config_data["defaults"]["settings"]["role"],
             "code_style": config_data["defaults"]["settings"]["code_style"],
         },

@@ -1,3 +1,5 @@
+import os
+
 from openai import OpenAI
 from openai.types.chat.parsed_chat_completion import ParsedChatCompletion
 
@@ -6,7 +8,15 @@ from app.models.config_model import ConfigModel
 from app.models.prompts_model import PromptsModel
 import app.models.responses as responses
 from app.models.app_generator_model import Role, ChatRecord
-from app.models.responses import AppResponse
+from app.models.responses import AppResponse, StructureResponse, CodeResponse
+
+
+def create_file_with_code(file_path, file_name, code) -> None:
+    """Creates files"""
+    os.makedirs(file_path, exist_ok=True)
+    with open(file_path + file_name, mode='w') as file:
+        file.write(code)
+        file.close()
 
 
 class AppGenerator:
@@ -15,7 +25,8 @@ class AppGenerator:
         self.client = OpenAI(api_key=cfg.openai_api_key)
         self.history = []
 
-    def send_request(self, request: str, response_format: responses, model: str = None, temperature: float = None, max_tokens: int = 1000) -> ParsedChatCompletion:
+    def send_request(self, request: str, response_format: responses, model: str = None, temperature: float = None,
+                     max_tokens: int = 1000) -> ParsedChatCompletion:
         self.save_history(ChatRecord(
             role=Role.User,
             content=request
@@ -48,13 +59,28 @@ class AppGenerator:
             }
         )
 
-    def create_app(self):
+    def create_app(self) -> None:
         """Creates an application"""
         prompts: PromptsModel = load_prompts()  # import prompts from prompts config
 
         # Idea generator
-        idea: AppResponse = self.send_request(request=prompts.idea_prompt, response_format=responses.AppResponse, max_tokens=100)
-        print(f"App idea: {idea.name_of_project}, {idea.small_description}")
+        idea: AppResponse = self.send_request(request=prompts.idea_prompt, response_format=responses.AppResponse,
+                                              max_tokens=100)
+
+        project_path = self.cfg.generated_files_path + idea.name_of_project + "/"
+
+        structure: StructureResponse = self.send_request(request=prompts.structure_prompt,
+                                                         response_format=responses.StructureResponse, max_tokens=500)
+
+        for file in structure.file:
+            file_path = file.path + file.filename
+
+            code: CodeResponse = self.send_request(request=prompts.code_prompt.format(file_path=file_path),
+                                                   response_format=responses.CodeResponse,
+                                                   max_tokens=self.cfg.max_tokens)
+
+            file_path = project_path + file.path
+            create_file_with_code(file_path=file_path, file_name=file.filename, code=code.code)
 
 
 if __name__ == '__main__':

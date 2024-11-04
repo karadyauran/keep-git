@@ -1,9 +1,9 @@
 # Paths configuration
 paths:
-  output_path: './output' # Directory where generated files are saved
+  output_path: 'output/' # Directory where generated files are saved
 
 keys:
-  openai-key: OPENAI_KEY
+  openai-key: OPENAI_KEY  # .env value !DO NOT USE YOUR REAL KEY HERE!
 
 # ChatGPT settings
 chat_gpt:

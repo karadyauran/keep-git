@@ -10,20 +10,23 @@ prompts:
   # Generating idea for a future application
   idea:
     prompt: |
-      Provide an idea for a web application on python consisting of 10-20 files. Name must be a snake_case, description up to 20 words
+      Provide an idea for a web application on python. Name must be a snake_case, description up to 20 words
     description: 'Suggests ideas for new applications.'
 
   # Make structure for code
   structure:
     prompt: |
-      List of file names for app we discussed before. Print a file with location (app/main.py, etc...). Use clean architecture for flask web app.
+      Give me a list of 20-25 files for app we discussed before. Print a path without '/' on the start and with '/' in the end and file name without any '/'. Do also main file. 
+      Make all paths from main file path of project, don't use application name. Do not use images, html files etc. Only Python files.
+      But don't forget about 'Makefile', 'Dockerfile', 'docker-compose', 'package.json', '.gitignore', 'README.md', '.env.example' files in the root of the project.
+      Use clean architecture for flask web app.
     description: 'Creates the initial structure for an application.'
 
   # Request code for a specific file
   code:
     prompt: |
-      Write the code for {file_path}. Ensure all files interact properly. 
-      Limit the code from 50 to 100 lines. Provide only the code, without markdown. Use few comments, in English only.
+      Write the full code for {file_path}. Ensure all files interact properly. 
+      Limit the code from 50 to 100 lines. Provide only the code, without markdown. Use few comments in English only.
     description: 'Generates code for specific modules based on requirements.'
 
   # Generate a commit message
