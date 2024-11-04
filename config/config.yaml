@@ -3,7 +3,7 @@ paths:
   output_path: './output' # Directory where generated files are saved
 
 keys:
-  openai-key: ${OPENAI_KEY}
+  openai-key: OPENAI_KEY
 
 # ChatGPT settings
 chat_gpt:
