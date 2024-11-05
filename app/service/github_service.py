@@ -1,5 +1,5 @@
 import os
-from github import Github
+from github import Github, GithubException
 
 from app.models.github_client_model import GitHubClientModel
 
@@ -29,21 +29,31 @@ class GitHubService:
             print(f"Failed to upload {remote_file_path}: {e}")
 
     def delete_all_files(self):
-        contents = self.repo.get_contents("", ref=self.branch)
-        commit_message = "Delete file in repository"
-        files_to_delete = []
+        try:
+            contents = self.repo.get_contents("", ref=self.branch)
 
-        while contents:
-            file_content = contents.pop(0)
-            if file_content.type == "dir":
-                contents.extend(self.repo.get_contents(file_content.path, ref=self.branch))
+            if not contents:
+                print("Repository is empty. Nothing to delete.")
+                return
+
+            files_to_delete = []
+
+            while contents:
+                file_content = contents.pop(0)
+                if file_content.type == "dir":
+                    contents.extend(self.repo.get_contents(file_content.path, ref=self.branch))
+                else:
+                    files_to_delete.append(file_content)
+
+            for file_content in files_to_delete:
+                self.repo.delete_file(
+                    path=file_content.path,
+                    message=f"Deleted file {file_content.path}",
+                    sha=file_content.sha,
+                    branch=self.branch
+                )
+        except GithubException as e:
+            if e.status == 404:
+                print("Repository is empty. Nothing to delete.")
             else:
-                files_to_delete.append(file_content)
-
-        for file_content in files_to_delete:
-            self.repo.delete_file(
-                path=file_content.path,
-                message=commit_message,
-                sha=file_content.sha,
-                branch=self.branch
-            )
+                print(f"An error occurred: {e}")

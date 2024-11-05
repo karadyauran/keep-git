@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 
 from openai import OpenAI
 from openai.types.chat.parsed_chat_completion import ParsedChatCompletion
@@ -85,6 +86,8 @@ class AppGenerator:
                                                          response_format=responses.StructureResponse, max_tokens=500)
 
         for file in structure.file:
+            time.sleep(100)
+
             file_path = file.path + file.filename
 
             code: CodeResponse = self.send_request(request=prompts.code_prompt.format(file_path=file_path),
