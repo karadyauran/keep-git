@@ -6,7 +6,7 @@ tokens:
   openai_token: OPENAI_TOKEN  # .env value !DO NOT USE YOUR REAL KEY HERE!
   github:
     token: GITHUB_TOKEN
-    repo: karadyauran/generated-by-ai
+    repo: # karadyauran/generated-by-ai example
 
 prompts:
   # default settings for all prompts
