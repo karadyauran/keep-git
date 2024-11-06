@@ -1,2 +1,2 @@
-from app.service.app_generator_service import AppGenerator
-from app.service.github_service import GitHubService
+from app.service.app_generator_service import AppGeneratorService
+from app.service.openai_service import OpenAIService, OpenaiRequest

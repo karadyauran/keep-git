@@ -1,25 +1,34 @@
-# default settings for all prompts
-defaults:
-  settings:
-    role: |
-      You are a senior software developer proficient in multiple programming languages.
-    code_style: |
-      clean code
+# Paths configuration
+paths:
+  output_app_path: 'output/' # Directory where generated files are saved, do not edit!
+
+tokens:
+  openai_token: OPENAI_TOKEN  # .env value !DO NOT USE YOUR REAL KEY HERE!
+  github:
+    token: GITHUB_TOKEN
+    repo: karadyauran/generated-by-ai
 
 prompts:
+  # default settings for all prompts
+  defaults:
+    settings:
+      role: |
+        You are a senior software developer proficient in multiple programming languages.
+
   # Generating idea for a future application
   idea:
     prompt: |
-      Provide an idea for a web application on python. Name must be a snake_case, description up to 20 words
+      Provide an idea for a console app on python.
     description: 'Suggests ideas for new applications.'
 
   # Make structure for code
   structure:
     prompt: |
-      Give me a list of 20-25 files for app we discussed before. Print a path without '/' on the start and with '/' in the end and file name without any '/'. Do also main file. 
+      Give me a list of 5-10 files for app we discussed before. Print a path without '/' on the start and with '/' in the end and file name without any '/'. Do also main file. 
       Make all paths from main file path of project, don't use application name. Do not use images, html files etc. Only Python files.
-      But don't forget about 'Makefile', 'Dockerfile', 'docker-compose', 'package.json', '.gitignore', 'README.md', '.env.example' files in the root of the project.
-      Use clean architecture for flask web app.
+      But don't forget about 'package.json', '.gitignore', 'README.md', '.env.example', 'LICENSE' files in the root of the project.
+      Start with files that do not depend on others. For example, main.py depends on all files, so it should be at the end.
+      Use clean architecture for console app.
     description: 'Creates the initial structure for an application.'
 
   # Request code for a specific file

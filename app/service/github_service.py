@@ -1,19 +1,29 @@
-import os
-from github import Github, GithubException
+from os import path
 
-from app.models.github_client_model import GitHubClientModel
+from github import Github, Repository, InputGitTreeElement
+
+from app.service import OpenAIService, OpenaiRequest
+from app.utils.file_utils import reset_folder
+from app.domain.responses_domain import StructureResponse, CommitResponse
+
+from tqdm import tqdm
 
 
-class GitHubService:
-    def __init__(self, github_cfg: GitHubClientModel):
-        self.github_cfg = github_cfg
-        self.g = Github(self.github_cfg.github_token)
-        self.repo = self.g.get_repo(self.github_cfg.repo)
-        self.branch = "main"
+class GithubService:
+    def __init__(self, openai_service: OpenAIService, github_token: str, repo: str, structure: StructureResponse,
+                 commit_prompt: str):
+        self._openai_service: OpenAIService = openai_service
+        self.github: Github = Github(github_token)
+        self.repo: Repository = self.github.get_repo(repo)
 
-    def upload_file(self, local_file_path: str, commit_message: str, remote_dir="") -> None:
-        relative_path = os.path.basename(local_file_path)
-        remote_file_path = os.path.join(remote_dir, relative_path).replace("\\", "/")
+        self.structure: StructureResponse = structure
+        self.commit_prompt: str = commit_prompt
+
+        self.branch: str = 'main'
+
+    def _upload_file(self, local_file_path: str, remote_file_path: str, commit_message: str) -> None:
+        relative_path = path.basename(local_file_path)
+        remote_file_path = path.join(remote_file_path, relative_path).replace("\\", "/")
 
         with open(local_file_path, "r") as file:
             content = file.read()
@@ -28,32 +38,52 @@ class GitHubService:
         except Exception as e:
             print(f"Failed to upload {remote_file_path}: {e}")
 
-    def delete_all_files(self):
-        try:
-            contents = self.repo.get_contents("", ref=self.branch)
+    def _delete_all_files_and_add_real_file(self, commit_message: str = "Delete all files and add README",
+                                            file_path: str = "output/README.md") -> None:
+        if not path.isfile(file_path):
+            print(f"File '{file_path}' does not exist.")
+            return
 
-            if not contents:
-                print("Repository is empty. Nothing to delete.")
-                return
+        with open(file_path, 'r') as f:
+            file_content = f.read()
 
-            files_to_delete = []
+        main_ref = self.repo.get_git_ref("heads/main")
+        latest_commit = self.repo.get_commit(main_ref.object.sha)
 
-            while contents:
-                file_content = contents.pop(0)
-                if file_content.type == "dir":
-                    contents.extend(self.repo.get_contents(file_content.path, ref=self.branch))
-                else:
-                    files_to_delete.append(file_content)
+        new_file = InputGitTreeElement(
+            path="README.md",
+            mode="100644",
+            type="blob",
+            content=file_content
+        )
+        new_tree = self.repo.create_git_tree([new_file])
+        new_commit = self.repo.create_git_commit(commit_message, new_tree, [latest_commit.commit])
+        main_ref.edit(new_commit.sha)
 
-            for file_content in files_to_delete:
-                self.repo.delete_file(
-                    path=file_content.path,
-                    message=f"Deleted file {file_content.path}",
-                    sha=file_content.sha,
-                    branch=self.branch
+    def _upload_to_github(self) -> None:
+        for file in tqdm(self.structure.file, desc="Upload files", unit="file"):
+            if file.name != "README.md":
+                commit: str = self._openai_service.openai_normal_request(
+                    OpenaiRequest(
+                        message=self.commit_prompt,
+                        max_token=100,
+                        response=CommitResponse
+                    )
+                ).commit_message
+
+                self._upload_file(
+                    local_file_path="output/" + file.__str__(),
+                    remote_file_path=file.path,
+                    commit_message=commit
                 )
-        except GithubException as e:
-            if e.status == 404:
-                print("Repository is empty. Nothing to delete.")
-            else:
-                print(f"An error occurred: {e}")
+
+    def upload_project_on_github(self) -> None:
+        with tqdm(total=3, desc="Uploading on GitHub", unit="step") as progress_bar:
+            progress_bar.update(1)
+            self._delete_all_files_and_add_real_file()
+
+            progress_bar.update(1)
+            self._upload_to_github()
+
+            progress_bar.update(1)
+            reset_folder()
