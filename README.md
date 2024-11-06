@@ -20,7 +20,21 @@ KeepGit is a Python script that generates code daily, saving it in a specified f
 
 ## Installation and Setup 𝌊
 
-*This section is under development and will be updated soon.*
+1. **Download the repository** and create an `.env` file based on `example.env`.  
+   - In this file, insert your **GitHub token** (grant it permissions for commits, pushes, and repository management) and **OpenAI token** to enable API functionality.
+
+2. **Edit Repository Configurations:**  
+   - Open `app/config/config.yaml` and in the `repo:` section, add the name of your repository in the format `your_username/repo_name`.  
+   - This should be a **public, empty, and newly created repository**.
+
+3. **Environment Setup:**  
+   - From the root directory, run the following commands:
+     - Create a virtual environment: `python -m venv .venv`
+     - Activate the environment: `source .venv/bin/activate` (Linux/Mac) or `.venv\Scripts\activate` (Windows)
+     - Install dependencies: `pip install -r requirements.txt`
+
+4. **Launch the Application:**  
+   - Run the command `python -m app.main` from the root directory to start the application.
 
 ---
 
